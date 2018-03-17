@@ -68,18 +68,22 @@ app.post('/houses', (req, res) => {
     })
 });
 
-app.post('/persons', (req, res) => {
+app.post('/persons', async (req, res) => {
+    const personData = {
+        nickname: req.body.nickname,
+        floor: req.body.floor,
+        hash: crypto.randomBytes(20).toString('hex')
+    };
+    const person = new Person(personData);
+    await person.save();
 
-    let data = req.body;
-    data.hash = crypto.randomBytes(20).toString('hex');
-    const person = new Person(data);
-    person.save(err => {
-        if (err) {
-            res.status(500).json(err);
-        } else {
-            res.json(person);
-        }
-    })
+    const houseHash = req.body.houseHash;
+    house = await House.findOne({hash: houseHash}).exec();
+    house.tenants = house.tenants || [];
+    house.tenants.push(person._id);
+    await house.save();
+
+    res.json(person);
 });
 
 app.post('/houses/:houseHash/items', async (req, res) => {
@@ -113,24 +117,16 @@ app.get('/houses/:houseHash/items', async (req, res) => {
 });
 
 app.post('/houses/:houseHash/tenants/:userId', async (req, res) => {
-
     const houseHash = req.params.houseHash;
     const userHash = req.get('X-UserHash');
     let user = await Person.findOne({hash: userHash}).exec();
 
-            House.findOne({hash: houseHash}).exec((err, house) => {
-                if (house.tenants) {
-                    house.tenants.push(user._id);
-                } else {
-                    house.tenants = [user._id];
-                }
-                house.save(err => {
-                    res.json(house);
-                })
-            })
-
+    house = await House.findOne({hash: houseHash}).exec();
+    house.tenants = house.tenants || [];
+    house.tenants.push(person._id);
+    await house.save();
+    res.json(house);
 });
-
 
 app.listen(8000, () => {
   console.log(' app listening on port 8000!')
