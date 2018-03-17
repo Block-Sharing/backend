@@ -5,6 +5,8 @@ const crypto = require('crypto');
 
 const Person = require('./schema/person');
 const House = require('./schema/house');
+const Item = require('./schema/item');
+const Category = require('./schema/category');
 
 const app = express();
 const Schema = mongoose.Schema;
@@ -79,6 +81,16 @@ app.post('houses/:hash/tenants/x-userId', (req, res) => {
 });
 
 
+app.get('/categories', (reg, res) => {
+    Category.find({}).exec((err, categories) => {
+        if (categories) {
+            res.send(categories);
+        } else {
+            res.sendStatus(404);
+        }
+    });
+});
+
 app.post('/houses', (req, res) => {
 
     let data = req.body;
@@ -107,9 +119,30 @@ app.post('/persons', (req, res) => {
     })
 });
 
+app.post('/houses/:houseHash/item', async (req, res) => {
+    let data = req.body;
+    const houseHash = req.params.houseHash;
+    const userId = req.get('X-UserHash');
+    console.log('Creating new Item for User ' + userId + ' for House' );
+    const item = new Item(data);
 
-
-
+    item.save(err => {
+        if (err) {
+            res.status(500).json(err);
+        } else {
+            House.findOne({hash: houseHash}).exec((err, house) => {
+                if (house.items) {
+                    house.items.push(item._id);
+                } else {
+                    house.items = [item._id];
+                }
+                house.save(err => {
+                    res.json(item);
+                })
+            });
+        }
+    })
+});
 
 app.listen(3000, () => {
   console.log(' app listening on port 3000!')
