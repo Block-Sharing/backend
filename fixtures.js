@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
 const House = require('./schema/house');
+const Category = require('./schema/category');
 const Person = require('./schema/person');
 
 const Schema = mongoose.Schema;
@@ -13,12 +14,20 @@ db.on('error', err => {
   console.error(`Error while connecting to DB: ${err.message}`);
 });
 
+
+async function loadCategories () {
+    const json = fs.readFileSync('./fixtures/categories.json').toString();
+    const categories = JSON.parse(json);
+    await Category.create(categories);
+}
+
 async function execute () {
-  const json = fs.readFileSync('./fixtures/house.json').toString();
-  const house = JSON.parse(json);
-  await mongoose.connection.dropDatabase();
-  await House.create(house);
-  await loadUser();
+    const json = fs.readFileSync('./fixtures/house.json').toString();
+    const house = JSON.parse(json);
+    await mongoose.connection.dropDatabase();
+    await House.create(house);
+    await loadCategories();
+    await loadUser();
 }
 
 async function loadUser () {
@@ -35,8 +44,9 @@ db.once('open', () => {
       process.exit(); // HACK!!
     });
 
-    promise.catch(() => {
+    promise.catch((err) => {
       console.log(`Error: Couldn't load fixtures`);
+      console.log(err);
       process.exit(); // HACK!!
     });
 
