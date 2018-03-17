@@ -34,14 +34,22 @@ app.get('/', (req, res) => {
     res.json({ response: 'Hello World!' });
 });
 
-app.get('/houses/:hash', (req, res) => {
-    House.findOne({hash: req.params.hash }).exec((err, house) => {
-        if (house) {
-            res.send(house);
-        } else {
-            res.sendStatus(404);
-        }
+app.get('/houses/:hash', async (req, res) => {
+    let house = await House.findOne({hash: req.params.hash })
+    .populate('tenants')
+    .populate('items')
+    .exec();
+
+    if (!house) {
+        res.sendStatus(404);
+    }
+
+    house.items = await Person.populate(house.items, {
+        path: 'owner',
+        select: ['nickname', 'floor']
     });
+
+    res.send(house)
 });
 
 app.get('/categories', (reg, res) => {
