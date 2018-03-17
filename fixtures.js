@@ -9,21 +9,26 @@ const db = mongoose.connection;
 mongoose.connect('mongodb://localhost:27017/blockSharing');
 
 db.on('error', err => {
-    console.error(`Error while connecting to DB: ${err.message}`);
+  console.error(`Error while connecting to DB: ${err.message}`);
 });
+
+async function execute () {
+  const json = fs.readFileSync('./fixtures/house.json').toString();
+  const house = JSON.parse(json);
+  await mongoose.connection.dropDatabase();
+  await House.create(house);
+}
 
 db.once('open', () => {
     console.log('DB connected successfully!');
-    var json = fs.readFileSync('./fixtures/house.json').toString();
-    var house = JSON.parse(json);
+    var promise = execute();
+    promise.then(() => {
+      console.log('Fixtures have been loaded');
+      process.exit(); // HACK!!
+    });
 
-    const houseObj = new House(house);
-    houseObj.save(err => {
-      if (err) {
-        console.log(`Error: Couldn't load fixtures`);
-      } else {
-        console.log('Fixtures have been loaded');
-      }
+    promise.catch(() => {
+      console.log(`Error: Couldn't load fixtures`);
       process.exit(); // HACK!!
     });
 

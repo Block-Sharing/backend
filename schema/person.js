@@ -1,5 +1,5 @@
-var mongoose = require('mongoose');
-var Schema = require('mongoose').Schema;
+const mongoose = require('mongoose');
+const Schema = require('mongoose').Schema;
 
 const PersonSchema = new Schema({
   hash: {type: String, unique : true, required : true},
