@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
 const House = require('./schema/house');
+const Person = require('./schema/person');
 
 const Schema = mongoose.Schema;
 const db = mongoose.connection;
@@ -17,6 +18,13 @@ async function execute () {
   const house = JSON.parse(json);
   await mongoose.connection.dropDatabase();
   await House.create(house);
+  await loadUser();
+}
+
+async function loadUser () {
+  const json = fs.readFileSync('./fixtures/person.json').toString();
+  const person = JSON.parse(json);
+  await Person.create(person);
 }
 
 db.once('open', () => {
