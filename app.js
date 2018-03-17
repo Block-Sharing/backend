@@ -1,16 +1,17 @@
 const express = require('express');
-const jsonParser = require('body-parser');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
 const Person = require('./schema/person');
+const House = require('./schema/house');
 
 const app = express();
 const Schema = mongoose.Schema;
 const db = mongoose.connection;
 
-app.use(jsonParser.json());
-app.use(jsonParser.urlencoded({
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
    extended: true
 }));
 
@@ -29,7 +30,17 @@ app.get('/', (req, res) => {
     res.json({ response: 'Hello World!' });
 });
 
-app.post('/person', (req, res) => {
+app.get('/houses/:hash', (req, res) => {
+    House.findOne({hash: req.params.hash }).exec((err, house) => {
+        if (house) {
+            res.send(house);
+        } else {
+            res.sendStatus(404);
+        }
+    });
+});
+
+app.post('/persons', (req, res) => {
 
     let data = req.body;
     data.hash = crypto.randomBytes(20).toString('hex');
