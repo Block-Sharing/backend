@@ -5,6 +5,7 @@ const crypto = require('crypto');
 
 const Person = require('./schema/person');
 const House = require('./schema/house');
+const Category = require('./schema/category');
 
 const app = express();
 const Schema = mongoose.Schema;
@@ -35,6 +36,16 @@ app.get('/houses/:hash', (req, res) => {
         if (house) {
             res.send(house);
         } else {
+            res.sendStatus(404);
+        }
+    });
+});
+
+app.get('/categories', (reg,res) =>  {
+    Category.find({}).exec((err, categories) => {
+        if (categories) {
+            res.send(categories);
+        } else  {
             res.sendStatus(404);
         }
     });
