@@ -40,6 +40,21 @@ app.get('/houses/:hash', (req, res) => {
     });
 });
 
+
+app.post('/houses', (req, res) => {
+
+    let data = req.body;
+    data.hash = crypto.randomBytes(20).toString('hex');
+    const house = new House(data);
+    house.save(err => {
+        if (err) {
+            res.status(500).json(err);
+        } else {
+            res.json(house);
+        }
+    })
+});
+
 app.post('/persons', (req, res) => {
 
     let data = req.body;
