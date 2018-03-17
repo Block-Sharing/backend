@@ -1,13 +1,13 @@
-var mongoose = require('mongoose');
-var Schema = require('mongoose').Schema;
+const mongoose = require('mongoose');
+const Schema = require('mongoose').Schema;
 
-var itemSchema = new Schema({
+const itemSchema = new Schema({
   category: { type: String },
   title: { type: String },
   description: { type: String },
   owner: [{ type: Schema.Types.ObjectId, ref: 'Person' }]
 });
 
-var House = mongoose.model('House', houseSchema);
+const Item = mongoose.model('Item', itemSchema);
 
-module.exports = House;
+module.exports = Item;
