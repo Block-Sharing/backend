@@ -42,45 +42,6 @@ app.get('/houses/:hash', (req, res) => {
     });
 });
 
-app.post('houses/:hash/tenants/x-userId', (req, res) => {
-
-    // let data = req.body;
-    // data.hash = crypto.randomBytes(20).toString('hex');
-
-    Person.findOne({hash: req.params.hash}).exec((err, person) =>{
-        if (person) {
-            console.log(person.id);
-        } else {
-
-        }
-    });
-    House.findOne({hash: req.params.hash}).exec((err, house) => {
-        if (house) {
-            console.log(house);
-        } else {
-
-        }
-    });
-
-    house.save(err => {
-        if (err) {
-            res.status(500).json(err);
-        } else {
-            res.json(house);
-        }
-    })
-
-    // const person = new Person(data);
-    // person.save(err => {
-    //     if (err) {
-    //         res.status(500).json(err);
-    //     } else {
-    //         res.json(person);
-    //     }
-    // })
-});
-
-
 app.get('/categories', (reg, res) => {
     Category.find({}).exec((err, categories) => {
         if (categories) {
@@ -142,6 +103,26 @@ app.post('/houses/:houseHash/item', async (req, res) => {
             });
         }
     })
+});
+
+
+app.post('/houses/:houseHash/tenants/:userId', async (req, res) => {
+
+    const houseHash = req.params.houseHash;
+    const userHash = req.get('X-UserHash');
+    let user = await Person.findOne({hash: userHash}).exec();
+
+            House.findOne({hash: houseHash}).exec((err, house) => {
+                if (house.tenants) {
+                    house.tenants.push(user._id);
+                } else {
+                    house.tenants = [user._id];
+                }
+                house.save(err => {
+                    res.json(house);
+                })
+            })
+
 });
 
 app.listen(3000, () => {
