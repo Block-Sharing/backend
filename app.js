@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const cors = require('cors');
 
 const Person = require('./schema/person');
 const House = require('./schema/house');
@@ -9,13 +10,15 @@ const Item = require('./schema/item');
 const Category = require('./schema/category');
 
 const app = express();
-const Schema = mongoose.Schema;
 const db = mongoose.connection;
 
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
    extended: true
 }));
+
+app.options('*', cors());
 
 mongoose.connect('mongodb://localhost:27017/blockSharing');
 
@@ -26,7 +29,6 @@ db.on('error', err => {
 db.once('open', () => {
     console.log('DB connected successfully!');
 });
-
 
 app.get('/', (req, res) => {
     res.json({ response: 'Hello World!' });
@@ -80,31 +82,35 @@ app.post('/persons', (req, res) => {
     })
 });
 
-app.post('/houses/:houseHash/item', async (req, res) => {
+app.post('/houses/:houseHash/items', async (req, res) => {
     let data = req.body;
     const houseHash = req.params.houseHash;
-    const userId = req.get('X-UserHash');
-    console.log('Creating new Item for User ' + userId + ' for House' );
+    const userHash = req.get('X-UserHash');
+    console.log('Creating new Item for User ' + userHash + ' for House' );
+    let person = await Person.findOne({hash: userHash}).exec();
+    data.owner = person._id;
     const item = new Item(data);
 
-    item.save(err => {
-        if (err) {
-            res.status(500).json(err);
-        } else {
-            House.findOne({hash: houseHash}).exec((err, house) => {
-                if (house.items) {
-                    house.items.push(item._id);
-                } else {
-                    house.items = [item._id];
-                }
-                house.save(err => {
-                    res.json(item);
-                })
-            });
-        }
-    })
+    await item.save();
+    let house = await House.findOne({hash: houseHash}).exec();
+    house.items = house.items || [];
+    house.items.push(item._id);
+    await house.save();
+    res.json(item);
 });
 
+app.get('/houses/:houseHash/items', async (req, res) => {
+    const houseHash = req.params.houseHash;
+    let house = await House.findOne({hash: houseHash})
+    .populate('items')
+    .exec();
+
+    let items = await Person.populate(house.items, {
+        path: 'owner',
+        select: ['nickname', 'floor']
+    });
+    res.send(items);
+});
 
 app.post('/houses/:houseHash/tenants/:userId', async (req, res) => {
 
@@ -125,6 +131,7 @@ app.post('/houses/:houseHash/tenants/:userId', async (req, res) => {
 
 });
 
-app.listen(3000, () => {
-  console.log(' app listening on port 3000!')
+
+app.listen(8000, () => {
+  console.log(' app listening on port 8000!')
 });

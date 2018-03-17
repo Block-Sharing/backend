@@ -20,6 +20,7 @@
   "homepage": "https://github.com/Block-Sharing/backend#readme",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
     "crypto": "^1.0.1",
     "express": "^4.16.2",
     "mongodb": "^3.0.4",
