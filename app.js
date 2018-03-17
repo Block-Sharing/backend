@@ -5,6 +5,7 @@ const crypto = require('crypto');
 
 const Person = require('./schema/person');
 const House = require('./schema/house');
+const Item = require('./schema/item');
 
 const app = express();
 const Schema = mongoose.Schema;
@@ -65,6 +66,31 @@ app.post('/persons', (req, res) => {
             res.status(500).json(err);
         } else {
             res.json(person);
+        }
+    })
+});
+
+app.post('/houses/:houseHash/item', async (req, res) => {
+    let data = req.body;
+    const houseHash = req.params.houseHash;
+    const userId = req.get('X-UserHash');
+    console.log('Creating new Item for User ' + userId + ' for House' );
+    const item = new Item(data);
+
+    item.save(err => {
+        if (err) {
+            res.status(500).json(err);
+        } else {
+            House.findOne({hash: houseHash}).exec((err, house) => {
+                if (house.items) {
+                    house.items.push(item._id);
+                } else {
+                    house.items = [item._id];
+                }
+                house.save(err => {
+                    res.json(item);
+                })
+            });
         }
     })
 });
