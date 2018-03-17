@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const cors = require('cors');
 
 const Person = require('./schema/person');
 const House = require('./schema/house');
@@ -9,13 +10,15 @@ const Item = require('./schema/item');
 const Category = require('./schema/category');
 
 const app = express();
-const Schema = mongoose.Schema;
 const db = mongoose.connection;
 
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
    extended: true
 }));
+
+app.options('*', cors());
 
 mongoose.connect('mongodb://localhost:27017/blockSharing');
 
@@ -26,7 +29,6 @@ db.on('error', err => {
 db.once('open', () => {
     console.log('DB connected successfully!');
 });
-
 
 app.get('/', (req, res) => {
     res.json({ response: 'Hello World!' });
@@ -105,6 +107,6 @@ app.post('/houses/:houseHash/item', async (req, res) => {
     })
 });
 
-app.listen(3000, () => {
-  console.log(' app listening on port 3000!')
+app.listen(8000, () => {
+  console.log(' app listening on port 8000!')
 });
