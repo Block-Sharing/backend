@@ -41,14 +41,28 @@ app.get('/houses/:hash', (req, res) => {
     });
 });
 
-app.get('/categories', (reg,res) =>  {
+app.get('/categories', (reg, res) => {
     Category.find({}).exec((err, categories) => {
         if (categories) {
             res.send(categories);
-        } else  {
+        } else {
             res.sendStatus(404);
         }
     });
+});
+
+app.post('/houses', (req, res) => {
+
+    let data = req.body;
+    data.hash = crypto.randomBytes(20).toString('hex');
+    const house = new House(data);
+    house.save(err => {
+        if (err) {
+            res.status(500).json(err);
+        } else {
+            res.json(house);
+        }
+    })
 });
 
 app.post('/persons', (req, res) => {
