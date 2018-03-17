@@ -1,8 +1,8 @@
 const express = require('express');
-const app = express();
 const jsonParser = require('body-parser');
-
 const mongoose = require('mongoose');
+
+const app = express();
 const Schema = mongoose.Schema;
 const db = mongoose.connection;
 
@@ -11,7 +11,7 @@ app.use(jsonParser.urlencoded({
    extended: true
 }));
 
-mongoose.connect('mongodb://localhost:27017');
+mongoose.connect('mongodb://localhost:27017/blockSharing');
 
 db.on('error', err => {
     console.error(`Error while connecting to DB: ${err.message}`);
@@ -39,5 +39,5 @@ app.post('/person', (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log('Example app listening on port 3000!')
+  console.log(' app listening on port 3000!')
 });
