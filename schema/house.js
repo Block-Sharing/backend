@@ -6,7 +6,7 @@ var houseSchema = new Schema({
   city: { type: String },
   hash: { type: String },
   items: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
-  tenants: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+  tenants: [{ type: Schema.Types.ObjectId, ref: 'Person' }]
 });
 
 var House = mongoose.model('House', houseSchema);
