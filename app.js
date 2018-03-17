@@ -40,6 +40,44 @@ app.get('/houses/:hash', (req, res) => {
     });
 });
 
+app.post('houses/:hash/tenants/x-userId', (req, res) => {
+
+    // let data = req.body;
+    // data.hash = crypto.randomBytes(20).toString('hex');
+
+    Person.findOne({hash: req.params.hash}).exec((err, person) =>{
+        if (person) {
+            console.log(person.id);
+        } else {
+
+        }
+    });
+    House.findOne({hash: req.params.hash}).exec((err, house) => {
+        if (house) {
+            console.log(house);
+        } else {
+
+        }
+    });
+
+    house.save(err => {
+        if (err) {
+            res.status(500).json(err);
+        } else {
+            res.json(house);
+        }
+    })
+
+    // const person = new Person(data);
+    // person.save(err => {
+    //     if (err) {
+    //         res.status(500).json(err);
+    //     } else {
+    //         res.json(person);
+    //     }
+    // })
+});
+
 
 app.post('/houses', (req, res) => {
 
@@ -68,6 +106,10 @@ app.post('/persons', (req, res) => {
         }
     })
 });
+
+
+
+
 
 app.listen(3000, () => {
   console.log(' app listening on port 3000!')
